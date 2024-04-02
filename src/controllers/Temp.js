@@ -89,19 +89,36 @@ module.exports = {
             const registers = await Register.find({ date }).sort({ _id: -1 }).limit(count);
             const countRegisters = (await Register.find({ date })).length;
             const temperatures = registers.map(record => record.temp);
-            const minTemperatura = Math.min(...temperatures);
-            const maxTemperatura = Math.max(...temperatures);
             const totalTemperature = temperatures.reduce((acc, temperature) => acc + temperature, 0);
-
             const averageTemperature = totalTemperature / temperatures.length;
+
+            // Encontrar a temperatura máxima e mínima
+            const maxTemperature = Math.max(...temperatures);
+            const minTemperature = Math.min(...temperatures);
+
+            // Encontrar os registros correspondentes às temperaturas máxima e mínima
+            const recordWithMaxTemp = registers.find(record => record.temp === maxTemperature);
+            const recordWithMinTemp = registers.find(record => record.temp === minTemperature);
+
+            console.log("Temperatura Máxima:", maxTemperature, "Data e Hora:", recordWithMaxTemp.date + "-" + recordWithMaxTemp.hour);
+            console.log("Temperatura Mínima:", minTemperature, "Data e Hora:", recordWithMinTemp.date + "-" + recordWithMinTemp.hour);
+
 
             return res.status(202).json({
                 registers: registers,
                 averageTemperature: averageTemperature,
                 count: temperatures.length,
                 maxDatesCount: countRegisters,
-                minTemperatura: minTemperatura,
-                maxTemperatura: maxTemperatura
+                max: {
+                    temp: maxTemperature,
+                    date: recordWithMaxTemp.date,
+                    hour: recordWithMaxTemp.hour
+                },
+                min: {
+                    temp: minTemperature,
+                    date: recordWithMinTemp.date,
+                    hour: recordWithMinTemp.hour
+                }
             });
         } catch (error) {
             console.error("Erro ao recuperar os registros por data:", error);
