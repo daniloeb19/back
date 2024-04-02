@@ -89,12 +89,20 @@ module.exports = {
             const registers = await Register.find({ date }).sort({ _id: -1 }).limit(count);
             const countRegisters = (await Register.find({ date })).length;
             const temperatures = registers.map(record => record.temp);
-
+            const minTemperatura = Math.min(...temperatures);
+            const maxTemperatura = Math.max(...temperatures);
             const totalTemperature = temperatures.reduce((acc, temperature) => acc + temperature, 0);
 
             const averageTemperature = totalTemperature / temperatures.length;
 
-            return res.status(202).json({ registers: registers, averageTemperature: averageTemperature, count: temperatures.length, maxDatesCount: countRegisters });
+            return res.status(202).json({
+                registers: registers,
+                averageTemperature: averageTemperature,
+                count: temperatures.length,
+                maxDatesCount: countRegisters,
+                minTemperatura: minTemperatura,
+                maxTemperatura: maxTemperatura
+            });
         } catch (error) {
             console.error("Erro ao recuperar os registros por data:", error);
             return res.status(500).json({ error: "Erro interno do servidor" });
